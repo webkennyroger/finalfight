@@ -20,5 +20,7 @@ void char_apply_damage(Character *c, u8 dmg);
 void char_update_hurt(Character *c);
 void char_sort_y_order(void);
 void char_swap_oam(Character *p1, Character *p2);
+void char_draw(Character *c);
+void char_land(Character *c);
 
 #endif

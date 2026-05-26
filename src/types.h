@@ -10,6 +10,7 @@
 #define MAX_CHARS       5
 #define MAX_SPR_QUEUE   16
 #define HUD_SIZE        160
+#define MAX_PROJECTILES 3
 
 // ============================================================
 //  Estados principais do personagem
@@ -23,6 +24,9 @@
 #define STATE_JUMP      6
 #define STATE_GRAB      7
 #define STATE_JUMP_KICK 8
+#define STATE_DASH      9
+#define STATE_SPECIAL1 10
+#define STATE_SPECIAL2 11
 
 // ============================================================
 //  Sub-estados do Guy (índice no array gGuyFrames)
@@ -70,7 +74,26 @@
 #define GUY_JUMP_KICK_3 29
 #define GUY_JUMP_KICK_4 30
 
-#define GUY_TOTAL_FRAMES 31
+// DASH (6 frames, reuses walk tiles but STATE_DASH)
+#define GUY_DASH_1      31
+#define GUY_DASH_2      32
+#define GUY_DASH_3      33
+#define GUY_DASH_4      34
+#define GUY_DASH_5      35
+#define GUY_DASH_6      36
+
+// Bushin Senpukyaku — spinning kick (4 frames, reuses kick tiles)
+#define GUY_SPECIAL1_1  37
+#define GUY_SPECIAL1_2  38
+#define GUY_SPECIAL1_3  39
+#define GUY_SPECIAL1_4  40
+
+// Bushin Goraisenpujin — projectile (3 frames, reuses punch tiles)
+#define GUY_SPECIAL2_1  41
+#define GUY_SPECIAL2_2  42
+#define GUY_SPECIAL2_3  43
+
+#define GUY_TOTAL_FRAMES 44
 
 // ============================================================
 //  Sub-estados dos inimigos
@@ -88,8 +111,16 @@
 // ============================================================
 #define PLAYER_SPEED_X  3
 #define PLAYER_SPEED_Y  2
+#define DASH_SPEED_X    6
 #define ENEMY_SPEED_X   1
 #define ENEMY_SPEED_Y   1
+
+// ============================================================
+//  Física de pulo
+// ============================================================
+#define GRAVITY          1
+#define JUMP_VEL        -7
+#define GROUND_Y        160
 
 // ============================================================
 //  Limites de tela
@@ -148,6 +179,7 @@ typedef struct _Character {
     u8    speed;
     u8    speedTimer;
     u8    hflip;
+    int   groundY;
 
     u8   hp;
     u8   maxHp;
@@ -191,11 +223,27 @@ typedef struct {
 } VramEntry;
 
 // ============================================================
+//  Projétil
+// ============================================================
+typedef struct {
+    int  x, y;
+    int  velX;
+    u8   oamId;
+    u8   tileIndex;
+    u8   paletteSlot;
+    u8   damage;
+    u8   life;
+    bool active;
+    bool friendly;
+    u8   hflip;
+} Projectile;
+
+// ============================================================
 //  Globais compartilhados
 // ============================================================
 extern Character  gCharacters[MAX_CHARS];
 extern Character *gPlayer;
 extern Character *gYOrder[MAX_CHARS];
-extern u16        gHudBuffer[HUD_SIZE];
+extern Projectile gProjectiles[MAX_PROJECTILES];
 
 #endif // TYPES_H

@@ -92,11 +92,6 @@ guy_jump_tiles:
     .incbin "assets/build/sprites/guy/jump/guy_jump.pic"
 guy_jump_tiles_end:
 
-; Jump Kick: 4 frames (64×384 → 12288 bytes)
-guy_jump_kick_tiles:
-    .incbin "assets/build/sprites/guy/jump_kick/guy_jump_kick.pic"
-guy_jump_kick_tiles_end:
-
 .ENDS
 
 ; ============================================================
@@ -126,14 +121,76 @@ BG2_map:
     .incbin "assets/backgrounds/stage1/stage1_bg2.map"
 BG2_map_end:
 
-BG3_tiles:
-    .incbin "assets/backgrounds/stage1/stage1_bg3.pic"
-BG3_tiles_end:
-BG3_pal:
-    .incbin "assets/backgrounds/stage1/stage1_bg3.pal"
-BG3_pal_end:
-BG3_map:
-    .incbin "assets/backgrounds/stage1/stage1_bg3.map"
-BG3_map_end:
+; ============================================================
+;  HUD
+; ============================================================
+HUD_tiles:
+    .incbin "assets/hud/hud.pic"
+HUD_tiles_end:
+HUD_pal:
+    .incbin "assets/hud/hud.pal"
+HUD_pal_end:
+HUD_map:
+    .incbin "assets/hud/hud.map"
+HUD_map_end:
+
+.ENDS
+
+; ============================================================
+;  Inimigos (Hunter, May, Andore)
+;
+;  .pic files are full spritesheets (multiple 64x96 frames).
+;  Only the first frame (96 tiles / 3072 bytes) is loaded per
+;  enemy at VRAM, so all sub-states share the same tile data.
+; ============================================================
+
+; ------------------------------------------------------------
+;  HUNTER (64x896, 896 tiles = 28672 bytes)
+; ------------------------------------------------------------
+.BANK 6 SLOT 0
+.ORG 0
+.SECTION "HUNTER" SUPERFREE
+
+hunter_palette:
+    .incbin "assets/sprites/enemies/hunter/hunter.pal"
+hunter_palette_end:
+
+hunter_idle_tiles:
+    .incbin "assets/sprites/enemies/hunter/hunter.pic"
+hunter_idle_tiles_end:
+
+.ENDS
+
+; ------------------------------------------------------------
+;  MAY (64x704, 704 tiles = 22528 bytes)
+; ------------------------------------------------------------
+.BANK 7 SLOT 0
+.ORG 0
+.SECTION "MAY" SUPERFREE
+
+may_palette:
+    .incbin "assets/sprites/enemies/may/may.pal"
+may_palette_end:
+
+may_idle_tiles:
+    .incbin "assets/sprites/enemies/may/may.pic"
+may_idle_tiles_end:
+
+.ENDS
+
+; ------------------------------------------------------------
+;  ANDORE (64x896, 896 tiles = 28672 bytes)
+; ------------------------------------------------------------
+.BANK 8 SLOT 0
+.ORG 0
+.SECTION "ANDORE" SUPERFREE
+
+andore_palette:
+    .incbin "assets/sprites/enemies/andore/andore.pal"
+andore_palette_end:
+
+andore_idle_tiles:
+    .incbin "assets/sprites/enemies/andore/andore.pic"
+andore_idle_tiles_end:
 
 .ENDS

@@ -1,23 +1,22 @@
 #ifndef HUD_H
 #define HUD_H
 
+#include "types.h"
 #include <snes.h>
 
-// ============================================================
-//  hud.h
-//  Exporta os buffers de timer usados pelo VBlank handler
-// ============================================================
+#define HUD_ROWS   5
+#define HUD_COLS  32
+#define HUD_WORDS (HUD_ROWS * HUD_COLS)
 
-// Tile entries do timer (dezena e unidade) – escritos no VBlank
-extern u16 gTimerTiles[2];
+extern u16 gHudBuffer[HUD_WORDS];
+extern u8  gHudDirty;
 
-// Flag: VBlank handler copia gTimerTiles para VRAM quando = 1
-extern u8  gTimerDirty;
-
-// API pública
 void hud_init(void);
-void hud_set_timer(u16 value);
-u16  hud_tick_timer(void);
-void hud_update(void);
+void hud_draw(void);
+void hud_draw_hp(u8 hp, u8 maxHp);
+void hud_draw_timer(u8 seconds);
 
-#endif // HUD_H
+extern u16 gTimer;      // seconds remaining (counts down from 99)
+extern u8  gTimerTicks; // sub-second counter (60 ticks = 1 second)
+
+#endif

@@ -31,7 +31,7 @@ extern char guy_kick_tiles,       guy_kick_tiles_end;
 extern char guy_damage_tiles,     guy_damage_tiles_end;
 extern char guy_grab_tiles,       guy_grab_tiles_end;
 extern char guy_jump_tiles,       guy_jump_tiles_end;
-extern char guy_jump_kick_tiles,  guy_jump_kick_tiles_end;
+
 
 // --- Array de frames (29 sub-estados) ---
 extern SpriteFrame gGuyFrames[GUY_TOTAL_FRAMES];

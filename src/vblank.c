@@ -1,4 +1,9 @@
 #include "vblank.h"
+#include <snes/snestypes.h>
+
+// scanPads references these externs from libc.obj
+extern u16 pad_keys[2];
+extern u16 pad_keysold[2];
 
 // ============================================================
 //  vblank.c — Fila de DMA segura para tiles de sprite
@@ -71,6 +76,24 @@ void vblank_flush_sprite_queue(void) {
             sSprQueue[sSprHead].size
         );
         sSprHead--;
+    }
+}
+
+// ----------------------------------------------------------------
+//  scanPads — lê os joypads usando auto-read do SNES
+//
+//  A função scanPads() é declarada em <snes/pad.h> mas NÃO está
+//  implementada nos .obj da biblioteca PVSNESlib (só existe como
+//  VBlank@ScanPads, label local dentro do VBlank default).
+//  Esta implementação preenche essa lacuna.
+// ----------------------------------------------------------------
+void scanPads(void) {
+    vuint16 *joyreg = (vuint16 *)0x4218;
+    u8 i;
+    for (i = 0; i < 2; i++) {
+        u16 cur = joyreg[i];
+        pad_keysold[i] = pad_keys[i];
+        pad_keys[i]    = cur;
     }
 }
 

@@ -31,4 +31,21 @@ void enemy_init_andore(Character *c);
 // IA: atualiza lógica de um inimigo em relação ao jogador
 void enemy_update(Character *c, Character *player);
 
+// Configuração de uma onda de inimigos
+typedef struct {
+    u8   type;        // 0=Hunter, 1=May, 2=Andore
+    u8   count;
+    int  spawnX;
+    int  spawnY;
+    u8   oamStart;
+    u16  vramAddr;
+    u16  vramOffset;
+} WaveDef;
+
+// Inicializa ondas de inimigos
+void enemy_init_waves(void);
+
+// Tenta spawnar inimigos com base nos pontos de gatilho
+void enemy_update_waves(Character *player);
+
 #endif // ENEMY_H

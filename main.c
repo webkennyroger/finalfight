@@ -1,13 +1,3 @@
-/*
-    Final Fight SNES — main.c
-    Baseado no exemplo Mode1ContinuousScroll (odelot/sor2_snes)
-
-    FIX GEMINI #1-3 aplicados:
-      • Máquina de estados correta em player.c/character.c
-      • Loop principal usa gPlayer (não mais player1 separado)
-      • VBlank processa fila de DMA de tiles de sprite
-      • Metasprite dinâmico com flip horizontal automático
-*/
 #include <snes.h>
 #include "src/types.h"
 #include "src/character.h"
@@ -17,8 +7,12 @@
 #include "src/hud.h"
 #include "src/vblank.h"
 
+// scanPads is declared in <snes/pad.h> but that conflicts with <snes/input.h>
+// (both define KEY_* enums). We forward-declare it here instead.
+void scanPads(void);
+
 // ============================================================
-//  Assets (definidos em data.asm)
+//  Assets (data.asm)
 // ============================================================
 extern char BG1_tiles, BG1_tiles_end;
 extern char BG1_pal,   BG1_pal_end;
@@ -28,16 +22,15 @@ extern char BG2_tiles, BG2_tiles_end;
 extern char BG2_pal,   BG2_pal_end;
 extern char BG2_map,   BG2_map_end;
 
-extern char BG3_tiles, BG3_tiles_end;
-extern char BG3_pal,   BG3_pal_end;
-extern char BG3_map,   BG3_map_end;
+extern char HUD_tiles, HUD_tiles_end;
+extern char HUD_pal,   HUD_pal_end;
+extern char HUD_map,   HUD_map_end;
 
-// Tiles do Guy carregados via gPlayer (player_init define frames[])
 extern char guy_idle_tiles,  guy_idle_tiles_end;
 extern char guy_palette,     guy_palette_end;
 
 // ============================================================
-//  Scroll (estruturas do exemplo sor2_snes)
+//  Scroll (structs do exemplo sor2_snes)
 // ============================================================
 typedef struct {
     u8   id;
@@ -64,37 +57,33 @@ static BGScroll bgMain, bgSub;
 static BGInfo   bgInfo;
 
 // ============================================================
-//  VBlank — processa DMA de BG, HUD e fila de tiles de sprite
+//  VBlank
 // ============================================================
 void myconsoleVblank(void) {
-    if (!vblank_flag) return;
+    // 1) Read input
+    scanPads();
 
-    // 1) OAM → hardware (pvsneslib já faz isso via WaitForVBlank,
-    //    mas incluímos explicitamente para garantir)
+    // 2) OAM
     dmaCopyOAram((unsigned char*)&oamMemory, 0, 0x220);
 
-    // 2) Scroll BG1
+    // 3) Scroll BG1
     if (bgInfo.refreshBG1) {
         dmaCopyVram(bgInfo.bg1.gfxoffset, bgInfo.bg1.adrgfxvram, bgInfo.bg1.size);
         bgInfo.refreshBG1 = 0;
     }
 
-    // 3) Scroll BG2
+    // 4) Scroll BG2
     if (bgInfo.refreshBG2) {
         dmaCopyVram(bgInfo.bg2.gfxoffset, bgInfo.bg2.adrgfxvram, bgInfo.bg2.size);
         bgInfo.refreshBG2 = 0;
     }
 
-    // 4) Timer HUD (2 tiles do BG3)
-    if (gTimerDirty) {
-        dmaCopyVram((u8*)&gTimerTiles[0], 0x1000 + (0*32+14)*2, 2);
-        dmaCopyVram((u8*)&gTimerTiles[1], 0x1000 + (0*32+15)*2, 2);
-        gTimerDirty = 0;
-    }
-
-    // 5) Fila de tiles de sprite (DMA dos frames de animação)
-    //    Cada entrada tem ponteiro ROM → VRAM destino + tamanho
+    // 5) Flush queued sprite tile DMAs
     vblank_flush_sprite_queue();
+
+    // 6) HUD (full buffer to BG3 map at 0x1000)
+    hud_draw();
+
 }
 
 // ============================================================
@@ -130,88 +119,41 @@ static void handleScroll(BGScroll *s, int playerX, s8 playerVelX) {
 }
 
 // ============================================================
-//  FIX GEMINI #2: desenha metasprite correto baseado no gPlayer
-//
-//  Como o DMA já trocou o conteúdo do VRAM para o frame atual,
-//  o mesmo metasprite (guyMetasprite / guyMetaspriteFlip) serve
-//  para todas as animações.
-// ============================================================
-static void drawPlayer(void) {
-
-
-    static const u8 tileOffsets[24] = {
-        0,  2,  4,  6,
-        8, 10, 12, 14,
-       32, 34, 36, 38,
-       40, 42, 44, 46,
-       64, 66, 68, 70,
-       72, 74, 76, 78
-    };
-    u8 row, col;
-    u8 i = 0;
-    s16 baseX = gPlayer->x;
-    s16 baseY = gPlayer->y - (CANVAS_H - 1);
-
-    for (row = 0; row < 6; row++) {
-        for (col = 0; col < 4; col++) {
-            u8 drawCol = gPlayer->hflip ? (3 - col) : col;
-            u16 oamId = gPlayer->oamAddress + i * 4;
-
-            oamSet(oamId,
-                   baseX + drawCol * 16,
-                   baseY + row * 16,
-                   3,
-                   gPlayer->hflip,
-                   0,
-                   tileOffsets[i],
-                   gPlayer->paletteSlot);
-            oamSetEx(oamId, OBJ_SMALL, OBJ_SHOW);
-            i++;
-        }
-    }
-}
-
-// ============================================================
 //  MAIN
 // ============================================================
 int main(void) {
+    int i;
 
     // --- Tilemaps ---
     bgSetMapPtr(0, 0x0000,        SC_64x32);
     bgSetMapPtr(1, 0x0000 + 2048, SC_64x32);
-    bgSetMapPtr(2, 0x1000,        SC_32x32);   // BG3 = HUD
+    bgSetMapPtr(2, 0x1000,        SC_32x32);
 
     // --- Tilesets ---
     bgInitTileSet(0, &BG1_tiles, &BG1_pal, 2,
                   (&BG1_tiles_end - &BG1_tiles), 16*4, BG_16COLORS, 0x2000);
     bgInitTileSet(1, &BG2_tiles, &BG2_pal, 4,
                   (&BG2_tiles_end - &BG2_tiles), 16*4, BG_16COLORS, 0x3000);
-    bgInitTileSet(2, &BG3_tiles, &BG3_pal, 0,
-                  (&BG3_tiles_end - &BG3_tiles), 16*4, BG_4COLORS,  0x4000);
+    bgInitTileSet(2, &HUD_tiles, &HUD_pal, 0,
+                  (&HUD_tiles_end - &HUD_tiles), 16*4*8, BG_16COLORS, 0x4000);
 
     // --- Primeiros mapas de scroll ---
     updateBG1(&BG1_map, 0x0000,        2048);
     updateBG2(&BG2_map, 0x0000 + 2048, 2048);
 
-    // --- BG3 HUD estático (copiado uma vez) ---
-    WaitForVBlank();
-    dmaCopyVram(&BG3_map, 0x1000, 2048);
+    // --- BG3 HUD ---
     setMode(BG_MODE1, BG3_MODE1_PRIORITY_HIGH);
 
-    // --- Sprites: configura modo OBJ (small=16×16, large=32×32) ---
-    // Tiles do Guy idle carregados no VRAM 0x6000 para inicialização
+    // --- Sprites: OBJ (small=16x16) ---
     oamInitGfxSet(
         &guy_idle_tiles,
         (&guy_idle_tiles_end - &guy_idle_tiles),
         &guy_palette,
-        (&guy_palette_end    - &guy_palette),
-        0,        // OBJ palette slot 0
-        0x6000,   // base dos tiles no VRAM (pvsneslib word addr)
-        OBJ_SIZE16_L32
+        (&guy_palette_end  - &guy_palette),
+        0, 0x6000, OBJ_SIZE16_L32
     );
 
     // --- Inicializa sistema de personagens ---
-    int i;
     for (i = 0; i < MAX_CHARS; i++) gYOrder[i] = NULL;
 
     gPlayer = &gCharacters[0];
@@ -219,15 +161,27 @@ int main(void) {
     player_init(gPlayer);
     gPlayer->x = 48;
     gPlayer->y = 160;
-
-    // char_load_gfx: faz upload do frame inicial, da paleta, chama
-    // oamSet + oamSetEx(OBJ_SMALL, OBJ_SHOW) para tornar visível
+    gPlayer->groundY = GROUND_Y;
     char_load_gfx(gPlayer, 0, 0x6000, 0, 0);
+
+    // --- Inimigos: marcar como mortos ---
+    for (i = 1; i < MAX_CHARS; i++)
+        gCharacters[i].alive = false;
+
+    // --- Projéteis ---
+    collision_init_projectiles();
 
     // --- HUD ---
     hud_init();
+    hud_draw_hp(gPlayer->hp, gPlayer->maxHp);
+    hud_draw_timer((u8)gTimer);
+    WaitForVBlank();
+    hud_draw();
 
-    // --- VBlank handler customizado ---
+    // --- Ondas de inimigos ---
+    enemy_init_waves();
+
+    // --- VBlank ---
     vblank_init();
     nmiSet(myconsoleVblank);
 
@@ -257,30 +211,84 @@ int main(void) {
     //  GAME LOOP
     // ============================================================
     while (1) {
-
-        // 1. Input
         u16 pad = padsCurrent(0);
 
-        // 2. Lógica do jogador (estado + velocidade)
+        // 1) Player logic
         player_update(gPlayer, pad);
 
-        // 3. Física: aplica velocidade à posição
-        char_update_pos(gPlayer);
+        // 2) Update enemies
+        for (i = 1; i < MAX_CHARS; i++) {
+            if (gCharacters[i].alive)
+                enemy_update(&gCharacters[i], gPlayer);
+        }
 
-        // 4. Animação: tick do frame + enfileira DMA se mudou frame
-        char_update_gfx(gPlayer);
+        // 3) Spawn waves based on player position
+        enemy_update_waves(gPlayer);
 
-        // 5. Scroll (move BG junto com jogador)
+        // 3b) Timer countdown
+        if (gTimer > 0) {
+            gTimerTicks++;
+            if (gTimerTicks >= 60) {
+                gTimerTicks = 0;
+                gTimer--;
+                hud_draw_timer((u8)gTimer);
+            }
+        }
+
+        // 4) Physics: apply velocity + gravity to all
+        for (i = 0; i < MAX_CHARS; i++) {
+            if (gCharacters[i].alive)
+                char_update_pos(&gCharacters[i]);
+        }
+
+        // 5) Animation: tick frames
+        for (i = 0; i < MAX_CHARS; i++) {
+            if (gCharacters[i].alive)
+                char_update_gfx(&gCharacters[i]);
+        }
+
+        // 6) Check if SPECIAL2 should spawn projectile
+        {
+            static u8 sLastSub = 255;
+            u8 curSub = gPlayer->subState;
+            if (gPlayer->state == STATE_SPECIAL2 && curSub == GUY_SPECIAL2_2 && sLastSub != curSub) {
+                int dir = gPlayer->hflip ? -1 : 1;
+                collision_spawn_projectile(
+                    gPlayer->x + (dir > 0 ? 50 : -16),
+                    gPlayer->y - 30,
+                    dir * 4, 2, true
+                );
+            }
+            sLastSub = curSub;
+            if (gPlayer->state != STATE_SPECIAL2) sLastSub = 255;
+        }
+
+        // 7) Collision: hitboxes + projectiles
+        collision_check_hitboxes();
+
+        // 8) Projectile movement
+        collision_update_projectiles();
+
+        // 9) Physical overlap resolution
+        collision_resolve_overlap();
+
+        // 10) Z-depth sort (Y axis)
+        char_sort_y_order();
+
+        // 11) Draw all characters
+        for (i = 0; i < MAX_CHARS; i++) {
+            if (gCharacters[i].alive)
+                char_draw(&gCharacters[i]);
+        }
+
+        // 12) HUD
+        hud_draw_hp(gPlayer->hp, gPlayer->maxHp);
+
+        // 13) Scroll
         handleScroll(&bgMain, gPlayer->x, gPlayer->velX);
         handleScroll(&bgSub,  gPlayer->x, gPlayer->velX);
 
-        // 6. HUD: decrementa timer 1×/segundo
-        hud_tick_timer();
-
-        // 7. Desenha metasprite na OAM (espelhado automaticamente)
-        drawPlayer();
-
-        // 8. Aguarda VBlank (DMA de OAM + tiles + BG acontece aqui)
+        // 14) VBlank (DMA OAM + tiles + BG + HUD)
         WaitForVBlank();
     }
 

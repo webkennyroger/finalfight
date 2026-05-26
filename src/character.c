@@ -15,7 +15,6 @@
 Character  gCharacters[MAX_CHARS];
 Character *gPlayer      = NULL;
 Character *gYOrder[MAX_CHARS];
-u16        gHudBuffer[HUD_SIZE];
 
 // ----------------------------------------------------------------
 void char_init(Character *c, u16 tileSize, u16 paletteSize) {
@@ -28,6 +27,7 @@ void char_init(Character *c, u16 tileSize, u16 paletteSize) {
     c->frameCounter = 0;
     c->x = c->y = 0;
     c->y            = 150;
+    c->groundY      = GROUND_Y;
     c->velX = c->velY = 0;
     c->speed        = 0;
     c->speedTimer   = 0;
@@ -136,6 +136,9 @@ void char_update_pos(Character *c) {
 
     if (c->speedTimer == 0) {
         c->x += c->velX;
+        // Gravity: pull down when above ground
+        if (c->y < c->groundY || c->velY != 0)
+            c->velY += GRAVITY;
         c->y += c->velY;
     }
 
@@ -144,6 +147,12 @@ void char_update_pos(Character *c) {
 
     if (c->speedTimer == 0) c->speedTimer = c->speed;
     else                    c->speedTimer--;
+
+    // Ground clamp
+    if (c->y >= c->groundY) {
+        c->y = c->groundY;
+        if (c->velY > 0) c->velY = 0;
+    }
 
     if (c->x > SCREEN_MAX_X) c->x = SCREEN_MAX_X;
     if (c->x < SCREEN_MIN_X) c->x = SCREEN_MIN_X;
@@ -247,4 +256,51 @@ void char_swap_oam(Character *p1, Character *p2) {
     memcpy(&oamMemory[a2], tmp,            4);
     p1->oamAddress = a2;
     p2->oamAddress = a1;
+}
+
+// ----------------------------------------------------------------
+void char_land(Character *c) {
+    if (c->y >= c->groundY && c->velY >= 0) {
+        c->y = c->groundY;
+        c->velY = 0;
+        if (c->state == STATE_JUMP || c->state == STATE_JUMP_KICK)
+            char_set_state(c, STATE_IDLE, GUY_IDLE_1);
+    }
+}
+
+// ----------------------------------------------------------------
+//  Draw any character as a 4x6 metasprite (64x96 px, 16x16 OBJ)
+// ----------------------------------------------------------------
+void char_draw(Character *c) {
+    if (!c->alive || !c->visible) return;
+
+    static const u8 tileOffsets[24] = {
+         0,  2,  4,  6,
+         8, 10, 12, 14,
+        32, 34, 36, 38,
+        40, 42, 44, 46,
+        64, 66, 68, 70,
+        72, 74, 76, 78
+    };
+    u8 row, col, i = 0;
+    s16 baseX = c->x;
+    s16 baseY = c->y - (CANVAS_H - 1);
+
+    for (row = 0; row < 6; row++) {
+        for (col = 0; col < 4; col++) {
+            u8 drawCol = c->hflip ? (3 - col) : col;
+            u16 oamId = c->oamAddress + i * 4;
+
+            oamSet(oamId,
+                   baseX + drawCol * 16,
+                   baseY + row * 16,
+                   3,
+                   c->hflip,
+                   0,
+                   c->vramOffset + tileOffsets[i],
+                   c->paletteSlot);
+            oamSetEx(oamId, OBJ_SMALL, OBJ_SHOW);
+            i++;
+        }
+    }
 }
