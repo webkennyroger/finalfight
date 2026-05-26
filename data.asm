@@ -87,10 +87,90 @@ guy_grab_tiles_end:
 .ORG 0
 .SECTION "GUY_JUMP" SUPERFREE
 
-; Jump: 4 frames (64×384 → 12288 bytes)
+; Jump: 4 frames (64x384 → 12288 bytes)
 guy_jump_tiles:
     .incbin "assets/build/sprites/guy/jump/guy_jump.pic"
 guy_jump_tiles_end:
+
+; Jump Kick: 4 frames (64x384 → 12288 bytes)
+guy_jump_kick_tiles:
+    .incbin "assets/build/sprites/guy/jump_kick/guy_jump_kick.pic"
+guy_jump_kick_tiles_end:
+
+.ENDS
+
+; ============================================================
+;  BANCO 9: Low Kick + Super Preto (silhouette)
+; ============================================================
+.BANK 9 SLOT 0
+.ORG 0
+.SECTION "GUY_SPECIALS_A" SUPERFREE
+
+; Low Kick: 3 frames (64x288 → 9216 bytes)
+guy_low_kick_tiles:
+    .incbin "assets/build/sprites/guy/low_kick/guy_low_kick.pic"
+guy_low_kick_tiles_end:
+
+; Super preto (silhouette): 4 frames (64x384 → 12288 bytes)
+guy_superpreto_tiles:
+    .incbin "assets/build/sprites/guy/super/guy_superpreto.pic"
+guy_superpreto_tiles_end:
+
+.ENDS
+
+; ============================================================
+;  BANCO 10: Super
+; ============================================================
+.BANK 10 SLOT 0
+.ORG 0
+.SECTION "GUY_SUPER" SUPERFREE
+
+; Super: 8 frames (64x768 → 24576 bytes)
+guy_super_tiles:
+    .incbin "assets/build/sprites/guy/super/guy_super.pic"
+guy_super_tiles_end:
+
+.ENDS
+
+; ============================================================
+;  BANCO 11: Senpuukyaku
+; ============================================================
+.BANK 11 SLOT 0
+.ORG 0
+.SECTION "GUY_SENPUUKYAKU" SUPERFREE
+
+; Senpuukyaku: 8 frames (64x768 → 24576 bytes)
+guy_senpuukyaku_tiles:
+    .incbin "assets/build/sprites/guy/senpuukyaku/guy_senpuukyaku.pic"
+guy_senpuukyaku_tiles_end:
+
+.ENDS
+
+; ============================================================
+;  BANCO 12: Dash Kick
+; ============================================================
+.BANK 12 SLOT 0
+.ORG 0
+.SECTION "GUY_DASH_KICK" SUPERFREE
+
+; Dash Kick / Run Attack: 8 frames (64x768 → 24576 bytes)
+guy_dash_kick_tiles:
+    .incbin "assets/build/sprites/guy/dash/guy_dash_kick.pic"
+guy_dash_kick_tiles_end:
+
+.ENDS
+
+; ============================================================
+;  BANCO 13: Elbow Drop + Izuna Otoshi
+; ============================================================
+.BANK 13 SLOT 0
+.ORG 0
+.SECTION "GUY_ELBOW_DROP" SUPERFREE
+
+; Elbow Drop: 4 frames (64x384 → 12288 bytes)
+guy_elbow_drop_tiles:
+    .incbin "assets/build/sprites/guy/elbow_drop/guy_elbow_drop.pic"
+guy_elbow_drop_tiles_end:
 
 .ENDS
 

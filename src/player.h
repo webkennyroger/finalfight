@@ -24,16 +24,23 @@
 extern char guy_palette,          guy_palette_end;
 
 // --- Tiles de cada animação (definidos no data.asm) ---
-extern char guy_idle_tiles,       guy_idle_tiles_end;
-extern char guy_walk_tiles,       guy_walk_tiles_end;
-extern char guy_punch_tiles,      guy_punch_tiles_end;
-extern char guy_kick_tiles,       guy_kick_tiles_end;
-extern char guy_damage_tiles,     guy_damage_tiles_end;
-extern char guy_grab_tiles,       guy_grab_tiles_end;
-extern char guy_jump_tiles,       guy_jump_tiles_end;
+extern char guy_idle_tiles,         guy_idle_tiles_end;
+extern char guy_walk_tiles,         guy_walk_tiles_end;
+extern char guy_punch_tiles,        guy_punch_tiles_end;
+extern char guy_kick_tiles,         guy_kick_tiles_end;
+extern char guy_damage_tiles,       guy_damage_tiles_end;
+extern char guy_grab_tiles,         guy_grab_tiles_end;
+extern char guy_jump_tiles,         guy_jump_tiles_end;
+extern char guy_jump_kick_tiles,    guy_jump_kick_tiles_end;
+extern char guy_dash_tiles,         guy_dash_tiles_end;
+extern char guy_dash_kick_tiles,    guy_dash_kick_tiles_end;
+extern char guy_low_kick_tiles,     guy_low_kick_tiles_end;
+extern char guy_elbow_drop_tiles,   guy_elbow_drop_tiles_end;
+extern char guy_senpuukyaku_tiles,  guy_senpuukyaku_tiles_end;
+extern char guy_super_tiles,        guy_super_tiles_end;
+extern char guy_superpreto_tiles,   guy_superpreto_tiles_end;
 
-
-// --- Array de frames (29 sub-estados) ---
+// --- Array de frames ---
 extern SpriteFrame gGuyFrames[GUY_TOTAL_FRAMES];
 
 void player_init(Character *c);

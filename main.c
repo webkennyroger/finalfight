@@ -81,7 +81,7 @@ void myconsoleVblank(void) {
     // 5) Flush queued sprite tile DMAs
     vblank_flush_sprite_queue();
 
-    // 6) HUD (full buffer to BG3 map at 0x1000)
+    // 6) HUD
     hud_draw();
 
 }
@@ -142,7 +142,7 @@ int main(void) {
     updateBG2(&BG2_map, 0x0000 + 2048, 2048);
 
     // --- BG3 HUD ---
-    setMode(BG_MODE1, BG3_MODE1_PRIORITY_HIGH);
+    setMode(BG_MODE1, 0);
 
     // --- Sprites: OBJ (small=16x16) ---
     oamInitGfxSet(
@@ -172,7 +172,7 @@ int main(void) {
     collision_init_projectiles();
 
     // --- HUD ---
-    hud_init();
+    hud_init("GUY");
     hud_draw_hp(gPlayer->hp, gPlayer->maxHp);
     hud_draw_timer((u8)gTimer);
     WaitForVBlank();

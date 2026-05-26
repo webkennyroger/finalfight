@@ -1,7 +1,6 @@
 #include "hud.h"
 #include <snes.h>
-
-extern char HUD_map, HUD_map_end;
+#include <string.h>
 
 u16 gHudBuffer[HUD_WORDS];
 u8  gHudDirty;
@@ -9,25 +8,48 @@ u8  gHudDirty;
 u16 gTimer = 99;
 u8  gTimerTicks = 0;
 
+// Map = 0x2000 base; BG3 tiles loaded at 0x4000
 #define MAP_BASE    0x2000
 
-#define HP_START    80
-#define HP_WIDTH    16
-#define HP_FILLED   80
-#define HP_EMPTY    64
+// Layout: sor2-style — clear all, only write name + HP + timer
+// Row 0: [....................[99]]    timer at cols 24-25
+// Row 1: [GUY]...[████████████]       name cols 0-2, HP bar cols 8-23
+// Row 2-4: all blank
 
-// Timer: row 0, cols 24-25 (buffer indices 24-25)
-#define TENS_POS    24
-#define ONES_POS    25
-#define DIGIT_TILES 160
+#define NAME_POS     32  // row 1, col 0
+#define NAME_LEN_MAX  8
+
+#define HP_START     40  // row 1, col 8
+#define HP_WIDTH     16
+#define HP_FILLED    80
+#define HP_EMPTY     64
+
+#define TENS_POS     24  // row 0, col 24
+#define ONES_POS     25  // row 0, col 25
+
+#define DIGIT_TILES  160
+#define LETTER_TILES 170
+#define BLANK_TILE   2
 
 static u8 sLastTimerSeconds = 0xFF;
 
-void hud_init(void) {
-    u16 *src = (u16*)&HUD_map;
-    int i;
+void hud_init(const char *name) {
+    u16 blank = MAP_BASE + BLANK_TILE;
+    u16 *buf = gHudBuffer;
+    u16 i;
+
+    // Fill entire buffer with blank tile (sor2-style)
     for (i = 0; i < HUD_WORDS; i++)
-        gHudBuffer[i] = src[i];
+        buf[i] = blank;
+
+    // Write character name at NAME_POS
+    for (i = 0; i < NAME_LEN_MAX; i++) {
+        char c = name[i];
+        if (c == '\0') break;
+        if (c >= 'A' && c <= 'Z')
+            buf[NAME_POS + i] = MAP_BASE + LETTER_TILES + (c - 'A');
+    }
+
     gHudDirty = 1;
     sLastTimerSeconds = 0xFF;
 }
