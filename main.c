@@ -16,7 +16,6 @@
 #include "src/collision.h"
 #include "src/hud.h"
 #include "src/vblank.h"
-#include "src/guy_metasprites.h"
 
 // ============================================================
 //  Assets (definidos em data.asm)
@@ -115,7 +114,8 @@ static void updateBG2(u8 *data, u16 vram, int size) {
     bgInfo.refreshBG2     = 1;
 }
 
-static void handleScroll(BGScroll *s, int playerX) {
+static void handleScroll(BGScroll *s, int playerX, s8 playerVelX) {
+    if (playerVelX <= 0) return;
     if (playerX <= 94) return;
     if (s->scrX < s->maxScrollX) s->scrX++;
 
@@ -137,18 +137,38 @@ static void handleScroll(BGScroll *s, int playerX) {
 //  para todas as animações.
 // ============================================================
 static void drawPlayer(void) {
-    const t_metasprite *meta = gPlayer->hflip
-                               ? guyMetaspriteFlip
-                               : guyMetasprite;
 
-    oamMetaDraw16(
-        gPlayer->oamAddress,
-        gPlayer->x,
-        gPlayer->y - (CANVAS_H - 1),   // âncora no pé do personagem
-        (u8*)meta,
-        OBJ_SMALL,
-        0
-    );
+
+    static const u8 tileOffsets[24] = {
+        0,  2,  4,  6,
+        8, 10, 12, 14,
+       32, 34, 36, 38,
+       40, 42, 44, 46,
+       64, 66, 68, 70,
+       72, 74, 76, 78
+    };
+    u8 row, col;
+    u8 i = 0;
+    s16 baseX = gPlayer->x;
+    s16 baseY = gPlayer->y - (CANVAS_H - 1);
+
+    for (row = 0; row < 6; row++) {
+        for (col = 0; col < 4; col++) {
+            u8 drawCol = gPlayer->hflip ? (3 - col) : col;
+            u16 oamId = gPlayer->oamAddress + i * 4;
+
+            oamSet(oamId,
+                   baseX + drawCol * 16,
+                   baseY + row * 16,
+                   3,
+                   gPlayer->hflip,
+                   0,
+                   tileOffsets[i],
+                   gPlayer->paletteSlot);
+            oamSetEx(oamId, OBJ_SMALL, OBJ_SHOW);
+            i++;
+        }
+    }
 }
 
 // ============================================================
@@ -251,8 +271,8 @@ int main(void) {
         char_update_gfx(gPlayer);
 
         // 5. Scroll (move BG junto com jogador)
-        handleScroll(&bgMain, gPlayer->x);
-        handleScroll(&bgSub,  gPlayer->x);
+        handleScroll(&bgMain, gPlayer->x, gPlayer->velX);
+        handleScroll(&bgSub,  gPlayer->x, gPlayer->velX);
 
         // 6. HUD: decrementa timer 1×/segundo
         hud_tick_timer();

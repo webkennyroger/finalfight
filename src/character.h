@@ -9,7 +9,6 @@
 // Tamanho máximo de um tile de todos os personagens (Guy: 3072)
 #define TILE_BUF_SIZE  3072
 
-void char_rearrange_stride16(u8 *src, u8 *dst, u16 tileSize);
 void char_init(Character *c, u16 tileSize, u16 paletteSize);
 void char_load_gfx(Character *c, u8 oamAddr, u16 vramAddr, u16 vramOffset, u8 paletteSlot);
 void char_set_state(Character *c, u8 state, u8 subState);

@@ -39,36 +39,38 @@
 #define GUY_WALK_4       4
 #define GUY_WALK_5       5
 #define GUY_WALK_6       6
+#define GUY_WALK_7       7
+#define GUY_WALK_8       8
 
-#define GUY_PUNCH_1      7
-#define GUY_PUNCH_2      8
-#define GUY_PUNCH_3      9
-#define GUY_PUNCH_4     10
+#define GUY_PUNCH_1      9
+#define GUY_PUNCH_2     10
+#define GUY_PUNCH_3     11
+#define GUY_PUNCH_4     12
 
-#define GUY_KICK_1      11
-#define GUY_KICK_2      12
-#define GUY_KICK_3      13
-#define GUY_KICK_4      14
+#define GUY_KICK_1      13
+#define GUY_KICK_2      14
+#define GUY_KICK_3      15
+#define GUY_KICK_4      16
 
-#define GUY_HURT_1      15
-#define GUY_HURT_2      16
-#define GUY_DEAD_1      17
+#define GUY_HURT_1      17
+#define GUY_HURT_2      18
+#define GUY_DEAD_1      19
 
-#define GUY_GRAB_1      18
-#define GUY_GRAB_2      19
-#define GUY_GRAB_3      20
+#define GUY_GRAB_1      20
+#define GUY_GRAB_2      21
+#define GUY_GRAB_3      22
 
-#define GUY_JUMP_1      21
-#define GUY_JUMP_2      22
-#define GUY_JUMP_3      23
-#define GUY_JUMP_4      24
+#define GUY_JUMP_1      23
+#define GUY_JUMP_2      24
+#define GUY_JUMP_3      25
+#define GUY_JUMP_4      26
 
-#define GUY_JUMP_KICK_1 25
-#define GUY_JUMP_KICK_2 26
-#define GUY_JUMP_KICK_3 27
-#define GUY_JUMP_KICK_4 28
+#define GUY_JUMP_KICK_1 27
+#define GUY_JUMP_KICK_2 28
+#define GUY_JUMP_KICK_3 29
+#define GUY_JUMP_KICK_4 30
 
-#define GUY_TOTAL_FRAMES 29
+#define GUY_TOTAL_FRAMES 31
 
 // ============================================================
 //  Sub-estados dos inimigos

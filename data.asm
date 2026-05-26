@@ -27,17 +27,17 @@
 
 ; Paleta compartilhada por TODAS as animações do Guy
 guy_palette:
-    .incbin "assets/sprites/guy/idle/guy_idle.pal"
+    .incbin "assets/build/sprites/guy/idle/guy_idle.pal"
 guy_palette_end:
 
 ; Idle: 1 frame  (64×96 → 3072 bytes)
 guy_idle_tiles:
-    .incbin "assets/sprites/guy/idle/guy_idle.pic"
+    .incbin "assets/build/sprites/guy/idle/guy_idle.pic"
 guy_idle_tiles_end:
 
-; Walk: 6 frames (64×576 → 18432 bytes)
+; Walk: 8 frames (64×768 → 24576 bytes)
 guy_walk_tiles:
-    .incbin "assets/sprites/guy/walk/guy_walk.pic"
+    .incbin "assets/build/sprites/guy/walk/guy_walk.pic"
 guy_walk_tiles_end:
 
 .ENDS
@@ -51,12 +51,12 @@ guy_walk_tiles_end:
 
 ; Punch: 4 frames (64×384 → 12288 bytes)
 guy_punch_tiles:
-    .incbin "assets/sprites/guy/punch/guy_punch.pic"
+    .incbin "assets/build/sprites/guy/punch/guy_punch.pic"
 guy_punch_tiles_end:
 
 ; Kick: 4 frames (64×384 → 12288 bytes)
 guy_kick_tiles:
-    .incbin "assets/sprites/guy/kick/guy_kick.pic"
+    .incbin "assets/build/sprites/guy/kick/guy_kick.pic"
 guy_kick_tiles_end:
 
 .ENDS
@@ -70,12 +70,12 @@ guy_kick_tiles_end:
 
 ; Damage/Hurt: 3 frames (64×288 → 9216 bytes)
 guy_damage_tiles:
-    .incbin "assets/sprites/guy/damage/guy_damage.pic"
+    .incbin "assets/build/sprites/guy/damage/guy_damage.pic"
 guy_damage_tiles_end:
 
 ; Grab: 3 frames (64×288 → 9216 bytes)
 guy_grab_tiles:
-    .incbin "assets/sprites/guy/grab/guy_grab.pic"
+    .incbin "assets/build/sprites/guy/grab/guy_grab.pic"
 guy_grab_tiles_end:
 
 .ENDS
@@ -89,12 +89,12 @@ guy_grab_tiles_end:
 
 ; Jump: 4 frames (64×384 → 12288 bytes)
 guy_jump_tiles:
-    .incbin "assets/sprites/guy/jump/guy_jump.pic"
+    .incbin "assets/build/sprites/guy/jump/guy_jump.pic"
 guy_jump_tiles_end:
 
 ; Jump Kick: 4 frames (64×384 → 12288 bytes)
 guy_jump_kick_tiles:
-    .incbin "assets/sprites/guy/jump_kick/guy_jump_kick.pic"
+    .incbin "assets/build/sprites/guy/jump_kick/guy_jump_kick.pic"
 guy_jump_kick_tiles_end:
 
 .ENDS

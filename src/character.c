@@ -17,9 +17,6 @@ Character *gPlayer      = NULL;
 Character *gYOrder[MAX_CHARS];
 u16        gHudBuffer[HUD_SIZE];
 
-// Buffer global para rearranjo de tiles stride-16
-static u8 sTileBuf[TILE_BUF_SIZE];
-
 // ----------------------------------------------------------------
 void char_init(Character *c, u16 tileSize, u16 paletteSize) {
     c->tileSize     = tileSize;
@@ -51,43 +48,6 @@ void char_init(Character *c, u16 tileSize, u16 paletteSize) {
 }
 
 // ----------------------------------------------------------------
-//  Rearranja tiles contíguos (.pic) para ordem stride-16
-//  (necessário para sprites OBJ_SIZE16 = 16×16)
-//
-//  Cada frame tem N_BLOCKS = tileSize / 128  (128 bytes = 4 tiles por bloco 16×16)
-//  O hardware SNES com stride-16 espera, para cada bloco com tile inicial T:
-//    T, T+1   = top-left, top-right (linha superior do bloco)
-//    T+16, T+17 = bottom-left, bottom-right (linha inferior)
-//
-//  Grupos de 8 blocos compartilham o stride:
-//    grupo 0 (blocos 0-7):  T = 0,2,4,...,14
-//    grupo 1 (blocos 8-15): T = 32,34,...,46
-//    grupo 2 (blocos 16-23): T = 64,66,...,78
-// ----------------------------------------------------------------
-void char_rearrange_stride16(u8 *src, u8 *dst, u16 tileSize) {
-    u16 n_blocks = tileSize / 128;   // 128 bytes = 4 tiles de 32 bytes
-    u16 i;
-    for (i = 0; i < n_blocks; i++) {
-        u8 group = i / 8;
-        u8 idx   = i % 8;
-        u16 dst_tl = group * 32 + idx * 2;      // stride-16: TL
-        u16 dst_tr = dst_tl + 1;                  // TR
-        u16 dst_bl = dst_tl + 16;                 // BL
-        u16 dst_br = dst_tl + 17;                 // BR
-
-        u16 src_tl = i * 128;        // TL: 32 bytes
-        u16 src_tr = src_tl + 32;    // TR
-        u16 src_bl = src_tl + 64;    // BL
-        u16 src_br = src_tl + 96;    // BR
-
-        memcpy(dst + dst_tl * 32, src + src_tl, 32);
-        memcpy(dst + dst_tr * 32, src + src_tr, 32);
-        memcpy(dst + dst_bl * 32, src + src_bl, 32);
-        memcpy(dst + dst_br * 32, src + src_br, 32);
-    }
-}
-
-// ----------------------------------------------------------------
 void char_load_gfx(Character *c, u8 oamAddr, u16 vramAddr,
                    u16 vramOffset, u8 paletteSlot) {
     c->oamAddress  = oamAddr;
@@ -97,9 +57,8 @@ void char_load_gfx(Character *c, u8 oamAddr, u16 vramAddr,
 
     WaitForVBlank();
 
-    // Carrega frame inicial e paleta (rearrajado para stride-16)
-    char_rearrange_stride16(c->frames[0].tiles, sTileBuf, c->tileSize);
-    dmaCopyVram(sTileBuf, vramAddr, c->tileSize);
+    // gfx2snes -s 16 -o 16 already outputs OBJ 16x16 tile layout.
+    dmaCopyVram(c->frames[0].tiles, vramAddr, c->tileSize);
 
     u8 palEntry = 128 + paletteSlot * 32;   // OBJ palettes start at CGRAM 128
     dmaCopyCGram(c->frames[0].palette, palEntry, c->paletteSize);
@@ -133,14 +92,8 @@ void char_update_gfx(Character *c) {
         c->prevSubState = c->subState;
         c->prevState    = c->state;
         c->frameCounter = 0;
-        // Rearranja tiles contíguos → stride-16 antes de enfileirar
-        char_rearrange_stride16(
-            c->frames[c->subState].tiles,
-            sTileBuf,
-            c->tileSize
-        );
         vblank_queue_sprite(
-            sTileBuf,
+            c->frames[c->subState].tiles,
             c->vramAddress,
             c->tileSize
         );

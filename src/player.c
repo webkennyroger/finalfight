@@ -31,14 +31,16 @@ void player_init(Character *c) {
         0,0,0,0, false);
 
     // ----------------------------------------------------------
-    //  WALK (6 frames, ciclo)
+    //  WALK (8 frames, ciclo)
     // ----------------------------------------------------------
     set_frame(GUY_WALK_1, (u8*)(&guy_walk_tiles) + 0 * GUY_TILE_SIZE,  &guy_palette, STATE_WALK, STATE_WALK, GUY_WALK_2, 5, 0,0,0,0, false);
     set_frame(GUY_WALK_2, (u8*)(&guy_walk_tiles) + 1 * GUY_TILE_SIZE,  &guy_palette, STATE_WALK, STATE_WALK, GUY_WALK_3, 5, 0,0,0,0, false);
     set_frame(GUY_WALK_3, (u8*)(&guy_walk_tiles) + 2 * GUY_TILE_SIZE,  &guy_palette, STATE_WALK, STATE_WALK, GUY_WALK_4, 5, 0,0,0,0, false);
     set_frame(GUY_WALK_4, (u8*)(&guy_walk_tiles) + 3 * GUY_TILE_SIZE,  &guy_palette, STATE_WALK, STATE_WALK, GUY_WALK_5, 5, 0,0,0,0, false);
     set_frame(GUY_WALK_5, (u8*)(&guy_walk_tiles) + 4 * GUY_TILE_SIZE,  &guy_palette, STATE_WALK, STATE_WALK, GUY_WALK_6, 5, 0,0,0,0, false);
-    set_frame(GUY_WALK_6, (u8*)(&guy_walk_tiles) + 5 * GUY_TILE_SIZE,  &guy_palette, STATE_WALK, STATE_WALK, GUY_WALK_1, 5, 0,0,0,0, false);
+    set_frame(GUY_WALK_6, (u8*)(&guy_walk_tiles) + 5 * GUY_TILE_SIZE,  &guy_palette, STATE_WALK, STATE_WALK, GUY_WALK_7, 5, 0,0,0,0, false);
+    set_frame(GUY_WALK_7, (u8*)(&guy_walk_tiles) + 6 * GUY_TILE_SIZE,  &guy_palette, STATE_WALK, STATE_WALK, GUY_WALK_8, 5, 0,0,0,0, false);
+    set_frame(GUY_WALK_8, (u8*)(&guy_walk_tiles) + 7 * GUY_TILE_SIZE,  &guy_palette, STATE_WALK, STATE_WALK, GUY_WALK_1, 5, 0,0,0,0, false);
 
     // ----------------------------------------------------------
     //  PUNCH (4 frames, frame 2 tem hitbox)
