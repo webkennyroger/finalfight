@@ -81,7 +81,7 @@ void player_init(Character *c) {
     set_frame(GUY_JUMP_4, (u8*)(&guy_jump_tiles) + 3 * GUY_TILE_SIZE, &guy_palette, STATE_JUMP, STATE_IDLE, GUY_IDLE_1, 6, 0,0,0,0, false);
 
     // ----------------------------------------------------------
-    //  JUMP KICK (5 frames DEDICADOS)
+    // JUMP KICK (4 frames DEDICADOS)
     // ----------------------------------------------------------
     set_frame(GUY_JUMP_KICK_1, (u8*)(&guy_jump_kick_tiles) + 0 * GUY_TILE_SIZE, &guy_palette, STATE_JUMP_KICK, STATE_JUMP_KICK, GUY_JUMP_KICK_2, 4, 0,0,0,0,    false);
     set_frame(GUY_JUMP_KICK_2, (u8*)(&guy_jump_kick_tiles) + 1 * GUY_TILE_SIZE, &guy_palette, STATE_JUMP_KICK, STATE_JUMP_KICK, GUY_JUMP_KICK_3, 6, 30,63,10,58, true);

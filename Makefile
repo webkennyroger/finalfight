@@ -66,42 +66,47 @@ assets/backgrounds/stage1/stage1_bg2.pic assets/backgrounds/stage1/stage1_bg2.ma
 assets/hud/font.pic: tools/gen_hud_font.py
 	python tools/gen_hud_font.py
 
-assets/hud/hud.pic assets/hud/hud.map assets/hud/hud.pal: assets/hud/hud.png assets/hud/font.pic tools/convert_hud.py tools/merge_font.py
+assets/hud/hud.pic assets/hud/hud.map assets/hud/hud.pal: assets/hud/hud.png assets/hud/font.pic assets/hud/hud_digits.pic tools/convert_hud.py tools/merge_font.py tools/fix_hud_pal.py
 	python tools/convert_hud.py
-	$(GFXCONV) -s 8 -o 16 -u 16 -e 0 -p -m -g -a -R -t bmp -i assets/hud/hud.bmp
+	$(GFXCONV) -s 8 -o 0 -u 4 -e 0 -p -m -g -t bmp -i assets/hud/hud.bmp
+	python tools/fix_hud_pal.py
 	python tools/merge_font.py assets/hud/font.pic assets/hud/hud.pic
+	python tools/merge_font.py assets/hud/hud_digits.pic assets/hud/hud.pic
+
+assets/hud/hud_digits.pic: assets/hud/hud_digits.png tools/convert_hud_digits.py
+	python tools/convert_hud_digits.py
 
 assets/build/sprites/guy/idle/guy_idle.pic assets/build/sprites/guy/idle/guy_idle.pal: assets/build/sprites/guy/idle/guy_idle.png
 	@echo convert sprite ... $(notdir $@)
-	$(GFXCONV) -s 16 -o 16 -u 16 -p -t png -i $<
+	$(GFXCONV) -s 16 -o 0 -u 16 -p -t png -i $<
 
 assets/build/sprites/guy/walk/guy_walk.pic assets/build/sprites/guy/walk/guy_walk.pal: assets/build/sprites/guy/walk/guy_walk.png
 	@echo convert sprite ... $(notdir $@)
-	$(GFXCONV) -s 16 -o 16 -u 16 -p -t png -i $<
+	$(GFXCONV) -s 16 -o 0 -u 16 -p -t png -i $<
 
 assets/build/sprites/guy/punch/guy_punch.pic assets/build/sprites/guy/punch/guy_punch.pal: assets/build/sprites/guy/punch/guy_punch.png
 	@echo convert sprite ... $(notdir $@)
-	$(GFXCONV) -s 16 -o 16 -u 16 -p -t png -i $<
+	$(GFXCONV) -s 16 -o 0 -u 16 -p -t png -i $<
 
 assets/build/sprites/guy/kick/guy_kick.pic assets/build/sprites/guy/kick/guy_kick.pal: assets/build/sprites/guy/kick/guy_kick.png
 	@echo convert sprite ... $(notdir $@)
-	$(GFXCONV) -s 16 -o 16 -u 16 -p -t png -i $<
+	$(GFXCONV) -s 16 -o 0 -u 16 -p -t png -i $<
 
 assets/build/sprites/guy/damage/guy_damage.pic assets/build/sprites/guy/damage/guy_damage.pal: assets/build/sprites/guy/damage/guy_damage.png
 	@echo convert sprite ... $(notdir $@)
-	$(GFXCONV) -s 16 -o 16 -u 16 -p -t png -i $<
+	$(GFXCONV) -s 16 -o 0 -u 16 -p -t png -i $<
 
 assets/build/sprites/guy/grab/guy_grab.pic assets/build/sprites/guy/grab/guy_grab.pal: assets/build/sprites/guy/grab/guy_grab.png
 	@echo convert sprite ... $(notdir $@)
-	$(GFXCONV) -s 16 -o 16 -u 16 -p -t png -i $<
+	$(GFXCONV) -s 16 -o 0 -u 16 -p -t png -i $<
 
 assets/build/sprites/guy/jump/guy_jump.pic assets/build/sprites/guy/jump/guy_jump.pal: assets/build/sprites/guy/jump/guy_jump.png
 	@echo convert sprite ... $(notdir $@)
-	$(GFXCONV) -s 16 -o 16 -u 16 -p -t png -i $<
+	$(GFXCONV) -s 16 -o 0 -u 16 -p -t png -i $<
 
 assets/build/sprites/guy/dash/guy_dash.pic assets/build/sprites/guy/dash/guy_dash.pal: assets/build/sprites/guy/dash/guy_dash.png
 	@echo convert sprite ... $(notdir $@)
-	$(GFXCONV) -s 16 -o 16 -u 16 -p -t png -i $<
+	$(GFXCONV) -s 16 -o 0 -u 16 -p -t png -i $<
 
 # Dash kick / Run Attack (source horizontal strip, 800x96 -> center crop to 64x96 per frame)
 assets/build/sprites/guy/dash/guy_dash_kick.png: assets/sprites/characters/guy/dash/guy_dash_kick.png tools/normalize_superpreto.py
@@ -110,7 +115,7 @@ assets/build/sprites/guy/dash/guy_dash_kick.png: assets/sprites/characters/guy/d
 
 assets/build/sprites/guy/dash/guy_dash_kick.pic assets/build/sprites/guy/dash/guy_dash_kick.pal: assets/build/sprites/guy/dash/guy_dash_kick.png
 	@echo convert sprite ... $(notdir $@)
-	$(GFXCONV) -s 16 -o 16 -u 16 -p -t png -i $<
+	$(GFXCONV) -s 16 -o 0 -u 16 -p -t png -i $<
 
 # Super move (source horizontal strip)
 assets/build/sprites/guy/super/guy_super.png: assets/sprites/characters/guy/super/super.png tools/normalize_superpreto.py
@@ -119,7 +124,7 @@ assets/build/sprites/guy/super/guy_super.png: assets/sprites/characters/guy/supe
 
 assets/build/sprites/guy/super/guy_super.pic assets/build/sprites/guy/super/guy_super.pal: assets/build/sprites/guy/super/guy_super.png
 	@echo convert sprite ... $(notdir $@)
-	$(GFXCONV) -s 16 -o 16 -u 16 -p -t png -i $<
+	$(GFXCONV) -s 16 -o 0 -u 16 -p -t png -i $<
 
 # Super silhouette (source horizontal strip, non-standard size 416x80 -> pad to 64x96 per frame)
 assets/build/sprites/guy/super/guy_superpreto.png: assets/sprites/characters/guy/super/superpreto.png tools/normalize_superpreto.py
@@ -127,7 +132,7 @@ assets/build/sprites/guy/super/guy_superpreto.png: assets/sprites/characters/guy
 
 assets/build/sprites/guy/super/guy_superpreto.pic assets/build/sprites/guy/super/guy_superpreto.pal: assets/build/sprites/guy/super/guy_superpreto.png
 	@echo convert sprite ... $(notdir $@)
-	$(GFXCONV) -s 16 -o 16 -u 16 -p -t png -i $<
+	$(GFXCONV) -s 16 -o 0 -u 16 -p -t png -i $<
 
 # Jump Kick (source horizontal strip)
 assets/build/sprites/guy/jump_kick/guy_jump_kick.png: assets/sprites/characters/guy/jump_kick/guy-jump.png tools/normalize_superpreto.py
@@ -136,7 +141,7 @@ assets/build/sprites/guy/jump_kick/guy_jump_kick.png: assets/sprites/characters/
 
 assets/build/sprites/guy/jump_kick/guy_jump_kick.pic assets/build/sprites/guy/jump_kick/guy_jump_kick.pal: assets/build/sprites/guy/jump_kick/guy_jump_kick.png
 	@echo convert sprite ... $(notdir $@)
-	$(GFXCONV) -s 16 -o 16 -u 16 -p -t png -i $<
+	$(GFXCONV) -s 16 -o 0 -u 16 -p -t png -i $<
 
 # Low Kick (source horizontal strip)
 assets/build/sprites/guy/low_kick/guy_low_kick.png: assets/sprites/characters/guy/low_kick/guy_low_kick.png tools/normalize_superpreto.py
@@ -145,7 +150,7 @@ assets/build/sprites/guy/low_kick/guy_low_kick.png: assets/sprites/characters/gu
 
 assets/build/sprites/guy/low_kick/guy_low_kick.pic assets/build/sprites/guy/low_kick/guy_low_kick.pal: assets/build/sprites/guy/low_kick/guy_low_kick.png
 	@echo convert sprite ... $(notdir $@)
-	$(GFXCONV) -s 16 -o 16 -u 16 -p -t png -i $<
+	$(GFXCONV) -s 16 -o 0 -u 16 -p -t png -i $<
 
 # Elbow Drop (source already vertical 64x96, copy to build then convert)
 assets/build/sprites/guy/elbow_drop/guy_elbow_drop.png: assets/sprites/characters/guy/elbow_drop/guy_elbow_drop.png
@@ -154,7 +159,7 @@ assets/build/sprites/guy/elbow_drop/guy_elbow_drop.png: assets/sprites/character
 
 assets/build/sprites/guy/elbow_drop/guy_elbow_drop.pic assets/build/sprites/guy/elbow_drop/guy_elbow_drop.pal: assets/build/sprites/guy/elbow_drop/guy_elbow_drop.png
 	@echo convert sprite ... $(notdir $@)
-	$(GFXCONV) -s 16 -o 16 -u 16 -p -t png -i $<
+	$(GFXCONV) -s 16 -o 0 -u 16 -p -t png -i $<
 
 # Senpuukyaku (source horizontal strip)
 assets/build/sprites/guy/senpuukyaku/guy_senpuukyaku.png: assets/sprites/characters/guy/senpuukyaku/guy_senpuukyaku.png tools/normalize_superpreto.py
@@ -163,19 +168,19 @@ assets/build/sprites/guy/senpuukyaku/guy_senpuukyaku.png: assets/sprites/charact
 
 assets/build/sprites/guy/senpuukyaku/guy_senpuukyaku.pic assets/build/sprites/guy/senpuukyaku/guy_senpuukyaku.pal: assets/build/sprites/guy/senpuukyaku/guy_senpuukyaku.png
 	@echo convert sprite ... $(notdir $@)
-	$(GFXCONV) -s 16 -o 16 -u 16 -p -t png -i $<
+	$(GFXCONV) -s 16 -o 0 -u 16 -p -t png -i $<
 
 assets/sprites/enemies/hunter/hunter.pic assets/sprites/enemies/hunter/hunter.pal: assets/sprites/enemies/hunter/hunter.png
 	@echo convert sprite ... $(notdir $@)
-	$(GFXCONV) -s 16 -o 16 -u 16 -p -t png -i $<
+	$(GFXCONV) -s 16 -o 0 -u 16 -p -t png -i $<
 
 assets/sprites/enemies/may/may.pic assets/sprites/enemies/may/may.pal: assets/sprites/enemies/may/may.png
 	@echo convert sprite ... $(notdir $@)
-	$(GFXCONV) -s 16 -o 16 -u 16 -p -t png -i $<
+	$(GFXCONV) -s 16 -o 0 -u 16 -p -t png -i $<
 
 assets/sprites/enemies/andore/andore.pic assets/sprites/enemies/andore/andore.pal: assets/sprites/enemies/andore/andore.png
 	@echo convert sprite ... $(notdir $@)
-	$(GFXCONV) -s 16 -o 16 -u 16 -p -t png -i $<
+	$(GFXCONV) -s 16 -o 0 -u 16 -p -t png -i $<
 
 bitmaps : \
 	assets/backgrounds/stage1/stage1_bg1.pic \
@@ -187,6 +192,7 @@ bitmaps : \
 	assets/hud/hud.pic \
 	assets/hud/hud.map \
 	assets/hud/hud.pal \
+	assets/hud/hud_digits.pic \
 	assets/build/sprites/guy/idle/guy_idle.pic \
 	assets/build/sprites/guy/idle/guy_idle.pal \
 	assets/build/sprites/guy/walk/guy_walk.pic \

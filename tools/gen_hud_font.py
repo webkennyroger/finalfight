@@ -1,44 +1,10 @@
 """
-Generate digit + letter font tiles matching the HUD art style (Final Fight arcade).
+Generate letter font tiles (A-Z) matching the HUD art style (Final Fight arcade).
 Uses palette index 2 (white) on transparent (0).
-Output: assets/hud/font.pic (36 tiles, 1152 bytes, SNES 4bpp)
-Tile order: digits 0-9 (indices 0-9), then A-Z (indices 10-35)
+Output: assets/hud/font.pic (26 tiles, 416 bytes, SNES 2bpp)
+Tile order: A-Z (indices 0-25 within font.pic, mapped to 88-113 in final tileset)
 """
 import os, sys
-
-# --- Digit patterns (0-9) ---
-DIGITS = [
-    # 0
-    [0,0,2,2,2,2,0,0, 0,2,2,0,0,2,2,0, 0,2,2,0,0,2,2,0, 0,2,2,0,0,2,2,0,
-     0,2,2,0,0,2,2,0, 0,2,2,0,0,2,2,0, 0,2,2,0,0,2,2,0, 0,0,2,2,2,2,0,0],
-    # 1
-    [0,0,0,2,2,0,0,0, 0,2,2,2,2,0,0,0, 0,0,0,2,2,0,0,0, 0,0,0,2,2,0,0,0,
-     0,0,0,2,2,0,0,0, 0,0,0,2,2,0,0,0, 0,0,0,2,2,0,0,0, 0,2,2,2,2,2,2,0],
-    # 2
-    [0,0,2,2,2,2,0,0, 0,2,2,0,0,2,2,0, 0,0,0,0,0,2,2,0, 0,0,0,0,2,2,0,0,
-     0,0,0,2,2,0,0,0, 0,0,2,2,0,0,0,0, 0,2,2,0,0,0,0,0, 0,2,2,2,2,2,2,0],
-    # 3
-    [0,0,2,2,2,2,0,0, 0,2,2,0,0,2,2,0, 0,0,0,0,0,2,2,0, 0,0,0,2,2,2,0,0,
-     0,0,0,0,0,2,2,0, 0,0,0,0,0,2,2,0, 0,2,2,0,0,2,2,0, 0,0,2,2,2,2,0,0],
-    # 4
-    [0,0,0,0,2,2,0,0, 0,0,0,2,2,2,0,0, 0,0,2,0,2,2,0,0, 0,2,2,0,2,2,0,0,
-     0,2,2,2,2,2,2,0, 0,0,0,0,2,2,0,0, 0,0,0,0,2,2,0,0, 0,0,0,0,2,2,0,0],
-    # 5
-    [0,2,2,2,2,2,2,0, 0,2,2,0,0,0,0,0, 0,2,2,0,0,0,0,0, 0,2,2,2,2,2,0,0,
-     0,0,0,0,0,2,2,0, 0,0,0,0,0,2,2,0, 0,2,2,0,0,2,2,0, 0,0,2,2,2,2,0,0],
-    # 6
-    [0,0,2,2,2,2,0,0, 0,2,2,0,0,2,2,0, 0,2,2,0,0,0,0,0, 0,2,2,2,2,2,0,0,
-     0,2,2,0,0,2,2,0, 0,2,2,0,0,2,2,0, 0,2,2,0,0,2,2,0, 0,0,2,2,2,2,0,0],
-    # 7
-    [0,2,2,2,2,2,2,0, 0,0,0,0,0,2,2,0, 0,0,0,0,0,2,2,0, 0,0,0,0,2,2,0,0,
-     0,0,0,2,2,0,0,0, 0,0,0,2,2,0,0,0, 0,0,0,2,2,0,0,0, 0,0,0,2,2,0,0,0],
-    # 8
-    [0,0,2,2,2,2,0,0, 0,2,2,0,0,2,2,0, 0,2,2,0,0,2,2,0, 0,0,2,2,2,2,0,0,
-     0,2,2,0,0,2,2,0, 0,2,2,0,0,2,2,0, 0,2,2,0,0,2,2,0, 0,0,2,2,2,2,0,0],
-    # 9
-    [0,0,2,2,2,2,0,0, 0,2,2,0,0,2,2,0, 0,2,2,0,0,2,2,0, 0,0,2,2,2,2,2,0,
-     0,0,0,0,0,2,2,0, 0,0,0,0,0,2,2,0, 0,2,2,0,0,2,2,0, 0,0,2,2,2,2,0,0],
-]
 
 # --- Uppercase letter patterns (A-Z) ---
 LETTERS = {
@@ -97,8 +63,8 @@ LETTERS = {
 }
 
 def encode_tile(pixels):
-    """Encode 64-pixel list to SNES 4bpp tile (32 bytes)."""
-    tile = bytearray(32)
+    """Encode 64-pixel list to SNES 2bpp tile (16 bytes)."""
+    tile = bytearray(16)
     for row in range(8):
         b0 = 0
         b1 = 0
@@ -117,17 +83,13 @@ def main():
     out_file = os.path.join(out_dir, 'font.pic')
 
     tiles = bytearray()
-    # Digits 0-9 (tile indices 0-9, will be placed at 160-169 in final tileset)
-    for d in range(10):
-        tiles.extend(encode_tile(DIGITS[d]))
-    # Letters A-Z (tile indices 10-35, placed at 170-195 in final tileset)
     for c in range(ord('A'), ord('Z')+1):
         tiles.extend(encode_tile(LETTERS[chr(c)]))
 
     with open(out_file, 'wb') as f:
         f.write(tiles)
 
-    print(f'Generated {out_file}: {len(tiles)} bytes ({len(tiles)//32} tiles)')
+    print(f'Generated {out_file}: {len(tiles)} bytes ({len(tiles)//16} tiles, A-Z only)')
     return 0
 
 if __name__ == '__main__':

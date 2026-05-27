@@ -1,154 +1,230 @@
-"""
-Generate digit tiles matching the HUD art style (Final Fight arcade).
-Digit tiles use palette index 2 (white) for the digit body,
-palette index 0 for transparent background.
-Output: assets/hud/digits.pic (10 tiles, 320 bytes, SNES 4bpp)
-"""
-import struct, os, sys
+from PIL import Image
+import os
 
-# A bold arcade-style digit set using palette 2 (white) on transparent (0)
-# Each digit is 8x8 pixels drawn with thick strokes matching the HUD "99" style
-DIGITS = [
-    # 0
-    [
-        0,0,2,2,2,2,0,0,
-        0,2,2,0,0,2,2,0,
-        0,2,2,0,0,2,2,0,
-        0,2,2,0,0,2,2,0,
-        0,2,2,0,0,2,2,0,
-        0,2,2,0,0,2,2,0,
-        0,2,2,0,0,2,2,0,
-        0,0,2,2,2,2,0,0,
-    ],
-    # 1
-    [
-        0,0,0,2,2,0,0,0,
-        0,2,2,2,2,0,0,0,
-        0,0,0,2,2,0,0,0,
-        0,0,0,2,2,0,0,0,
-        0,0,0,2,2,0,0,0,
-        0,0,0,2,2,0,0,0,
-        0,0,0,2,2,0,0,0,
-        0,2,2,2,2,2,2,0,
-    ],
-    # 2
-    [
-        0,0,2,2,2,2,0,0,
-        0,2,2,0,0,2,2,0,
-        0,0,0,0,0,2,2,0,
-        0,0,0,0,2,2,0,0,
-        0,0,0,2,2,0,0,0,
-        0,0,2,2,0,0,0,0,
-        0,2,2,0,0,0,0,0,
-        0,2,2,2,2,2,2,0,
-    ],
-    # 3
-    [
-        0,0,2,2,2,2,0,0,
-        0,2,2,0,0,2,2,0,
-        0,0,0,0,0,2,2,0,
-        0,0,0,2,2,2,0,0,
-        0,0,0,0,0,2,2,0,
-        0,0,0,0,0,2,2,0,
-        0,2,2,0,0,2,2,0,
-        0,0,2,2,2,2,0,0,
-    ],
-    # 4
-    [
-        0,0,0,0,2,2,0,0,
-        0,0,0,2,2,2,0,0,
-        0,0,2,0,2,2,0,0,
-        0,2,2,0,2,2,0,0,
-        0,2,2,2,2,2,2,0,
-        0,0,0,0,2,2,0,0,
-        0,0,0,0,2,2,0,0,
-        0,0,0,0,2,2,0,0,
-    ],
-    # 5
-    [
-        0,2,2,2,2,2,2,0,
-        0,2,2,0,0,0,0,0,
-        0,2,2,0,0,0,0,0,
-        0,2,2,2,2,2,0,0,
-        0,0,0,0,0,2,2,0,
-        0,0,0,0,0,2,2,0,
-        0,2,2,0,0,2,2,0,
-        0,0,2,2,2,2,0,0,
-    ],
-    # 6
-    [
-        0,0,2,2,2,2,0,0,
-        0,2,2,0,0,2,2,0,
-        0,2,2,0,0,0,0,0,
-        0,2,2,2,2,2,0,0,
-        0,2,2,0,0,2,2,0,
-        0,2,2,0,0,2,2,0,
-        0,2,2,0,0,2,2,0,
-        0,0,2,2,2,2,0,0,
-    ],
-    # 7
-    [
-        0,2,2,2,2,2,2,0,
-        0,0,0,0,0,2,2,0,
-        0,0,0,0,0,2,2,0,
-        0,0,0,0,2,2,0,0,
-        0,0,0,2,2,0,0,0,
-        0,0,0,2,2,0,0,0,
-        0,0,0,2,2,0,0,0,
-        0,0,0,2,2,0,0,0,
-    ],
-    # 8
-    [
-        0,0,2,2,2,2,0,0,
-        0,2,2,0,0,2,2,0,
-        0,2,2,0,0,2,2,0,
-        0,0,2,2,2,2,0,0,
-        0,2,2,0,0,2,2,0,
-        0,2,2,0,0,2,2,0,
-        0,2,2,0,0,2,2,0,
-        0,0,2,2,2,2,0,0,
-    ],
-    # 9
-    [
-        0,0,2,2,2,2,0,0,
-        0,2,2,0,0,2,2,0,
-        0,2,2,0,0,2,2,0,
-        0,0,2,2,2,2,2,0,
-        0,0,0,0,0,2,2,0,
-        0,0,0,0,0,2,2,0,
-        0,2,2,0,0,2,2,0,
-        0,0,2,2,2,2,0,0,
-    ],
-]
+DIGIT_W = 16
+DIGIT_H = 16
+COLS = 8
+ROWS = 2
+SHEET_W = COLS * DIGIT_W
+SHEET_H = ROWS * DIGIT_H
 
-def encode_tile(pixels):
-    """Encode 64-pixel list to SNES 4bpp tile (32 bytes)."""
-    tile = bytearray(32)
-    for row in range(8):
-        b0 = 0
-        b1 = 0
-        for col in range(8):
-            pal = pixels[row * 8 + col]
-            bit = 7 - col
-            b0 |= (pal & 1) << bit
-            b1 |= ((pal >> 1) & 1) << bit
-        tile[row * 2] = b0
-        tile[row * 2 + 1] = b1
-    return tile
+FILL = (255, 255, 255, 255)
+EMPTY = (0, 0, 0, 0)
+OUTLINE = (0, 0, 0, 128)
+
+DIGITS = {
+    '0': [
+        "  xxxxxxxxx  ",
+        " xx      xx ",
+        "xx  xxxx  xx",
+        "xx xxxxxx xx",
+        "xx xxxxxx xx",
+        "xx xxxxxx xx",
+        "xx xxxxxx xx",
+        "xx xxxxxx xx",
+        "xx xxxxxx xx",
+        "xx xxxxxx xx",
+        "xx xxxxxx xx",
+        "xx  xxxx  xx",
+        " xx      xx ",
+        "  xxxxxxxxx  ",
+        "            ",
+        "            ",
+    ],
+    '1': [
+        "      xx     ",
+        "     xxx     ",
+        "    xxxx     ",
+        "   xxxxx     ",
+        "     xx      ",
+        "     xx      ",
+        "     xx      ",
+        "     xx      ",
+        "     xx      ",
+        "     xx      ",
+        "     xx      ",
+        "     xx      ",
+        "   xxxxxx    ",
+        "   xxxxxx    ",
+        "            ",
+        "            ",
+    ],
+    '2': [
+        "  xxxxxxxxx  ",
+        " xx      xx ",
+        "xx        xx",
+        "          xx",
+        "          xx",
+        "         xx ",
+        "       xx   ",
+        "      xx    ",
+        "     xx     ",
+        "    xx      ",
+        "   xx       ",
+        "  xx        ",
+        " xx        ",
+        "xxxxxxxxxxxx",
+        "            ",
+        "            ",
+    ],
+    '3': [
+        "  xxxxxxxxx  ",
+        " xx      xx ",
+        "xx        xx",
+        "          xx",
+        "          xx",
+        "       xxx  ",
+        "   xxxxx    ",
+        "       xxx  ",
+        "          xx",
+        "          xx",
+        "          xx",
+        "xx        xx",
+        " xx      xx ",
+        "  xxxxxxxxx  ",
+        "            ",
+        "            ",
+    ],
+    '4': [
+        "       xx    ",
+        "      xxx    ",
+        "     xxxx    ",
+        "    x xxx    ",
+        "   xx xxx    ",
+        "  xx  xxx    ",
+        " xx   xxx    ",
+        "xxxxxxxxxxxxx",
+        "       xxx    ",
+        "       xxx    ",
+        "       xxx    ",
+        "       xxx    ",
+        "       xxx    ",
+        "       xxx    ",
+        "            ",
+        "            ",
+    ],
+    '5': [
+        "xxxxxxxxxxxx",
+        "xx          ",
+        "xx          ",
+        "xx          ",
+        "xx          ",
+        "xx  xxxxxx  ",
+        " xxx     xx ",
+        "          xx",
+        "          xx",
+        "          xx",
+        "          xx",
+        "xx        xx",
+        " xxx     xx ",
+        "  xxxxxxxxx  ",
+        "            ",
+        "            ",
+    ],
+    '6': [
+        "  xxxxxxxxx  ",
+        " xx      xx ",
+        "xx        xx",
+        "xx          ",
+        "xx          ",
+        "xx  xxxxxx  ",
+        "xxx      xx ",
+        "xxx       xx",
+        "xxx       xx",
+        "xxx       xx",
+        "xxx       xx",
+        "xx        xx",
+        " xx      xx ",
+        "  xxxxxxxxx  ",
+        "            ",
+        "            ",
+    ],
+    '7': [
+        "xxxxxxxxxxxx",
+        "          xx",
+        "          xx",
+        "         xx ",
+        "        xx  ",
+        "        xx  ",
+        "       xx   ",
+        "       xx   ",
+        "      xx    ",
+        "      xx    ",
+        "     xx     ",
+        "     xx     ",
+        "    xx      ",
+        "    xx      ",
+        "            ",
+        "            ",
+    ],
+    '8': [
+        "  xxxxxxxxx  ",
+        " xx      xx ",
+        "xx        xx",
+        "xx        xx",
+        "xx        xx",
+        " xx      xx ",
+        "  xxxxxxxxx  ",
+        " xx      xx ",
+        "xx        xx",
+        "xx        xx",
+        "xx        xx",
+        "xx        xx",
+        " xx      xx ",
+        "  xxxxxxxxx  ",
+        "            ",
+        "            ",
+    ],
+    '9': [
+        "  xxxxxxxxx  ",
+        " xx      xx ",
+        "xx        xx",
+        "xx        xx",
+        "xx        xx",
+        "xx        xx",
+        " xx      xx ",
+        "  xxxxxxxxxx",
+        "          xx",
+        "          xx",
+        "          xx",
+        "xx        xx",
+        " xx      xx ",
+        "  xxxxxxxxx  ",
+        "            ",
+        "            ",
+    ],
+}
 
 def main():
     out_dir = os.path.join(os.path.dirname(__file__), '..', 'assets', 'hud')
-    out_file = os.path.join(out_dir, 'digits.pic')
+    os.makedirs(out_dir, exist_ok=True)
+    out = os.path.join(out_dir, 'hud_digits.png')
 
-    tiles = bytearray()
-    for d in range(10):
-        tiles.extend(encode_tile(DIGITS[d]))
+    img = Image.new('RGBA', (SHEET_W, SHEET_H), (0, 0, 0, 0))
+    pixels = img.load()
 
-    with open(out_file, 'wb') as f:
-        f.write(tiles)
+    layout = list('012345')
 
-    print(f'Generated {out_file}: {len(tiles)} bytes ({len(tiles)//32} tiles)')
+    for row in range(ROWS):
+        for col in range(COLS):
+            idx = row * COLS + col
+            if idx >= 10:
+                break
+            digit = str(idx)
+            pattern = DIGITS[digit]
+            ox = col * DIGIT_W
+            oy = row * DIGIT_H
+            for py in range(DIGIT_H):
+                for px in range(DIGIT_W):
+                    if py < len(pattern) and px < len(pattern[py]):
+                        ch = pattern[py][px]
+                        if ch == 'x':
+                            pixels[ox + px, oy + py] = FILL
+
+    img.save(out)
+    print(f'Generated {out}: {SHEET_W}x{SHEET_H}px, {len(layout)+4} digits (0-9)')
     return 0
 
 if __name__ == '__main__':
+    import sys
     sys.exit(main())

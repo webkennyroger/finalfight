@@ -310,30 +310,6 @@ typedef struct _Character {
 } Character;
 
 // ============================================================
-//  Estrutura de scroll de background
-// ============================================================
-typedef struct {
-    u8   bgLayer;
-    u16  vramAddress;
-    u16  scrollX;
-    u16  scrollY;
-    u8  *mapData;
-    u8   mapPage;
-    bool firstPage;
-    u16  maxScrollX;
-    u8   scrollSpeed;
-} ScrollBG;
-
-// ============================================================
-//  Fila DMA para VRAM
-// ============================================================
-typedef struct {
-    u8  *data;
-    u16  vramDest;
-    u16  size;
-} VramEntry;
-
-// ============================================================
 //  Projétil
 // ============================================================
 typedef struct {

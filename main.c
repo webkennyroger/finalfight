@@ -11,6 +11,8 @@
 // (both define KEY_* enums). We forward-declare it here instead.
 void scanPads(void);
 
+static enum { GS_PLAY, GS_GAMEOVER } gGameState;
+
 // ============================================================
 //  Assets (data.asm)
 // ============================================================
@@ -135,14 +137,15 @@ int main(void) {
     bgInitTileSet(1, &BG2_tiles, &BG2_pal, 4,
                   (&BG2_tiles_end - &BG2_tiles), 16*4, BG_16COLORS, 0x3000);
     bgInitTileSet(2, &HUD_tiles, &HUD_pal, 0,
-                  (&HUD_tiles_end - &HUD_tiles), 16*4*8, BG_16COLORS, 0x4000);
+                  (&HUD_tiles_end - &HUD_tiles), 4*2, BG_4COLORS, 0x4000);
 
     // --- Primeiros mapas de scroll ---
     updateBG1(&BG1_map, 0x0000,        2048);
     updateBG2(&BG2_map, 0x0000 + 2048, 2048);
 
     // --- BG3 HUD ---
-    setMode(BG_MODE1, 0);
+    setMode(BG_MODE1, BG3_MODE1_PRIORITY_HIGH);
+    dmaCopyVram((u8*)&HUD_map, 0x1000, (&HUD_map_end - &HUD_map));
 
     // --- Sprites: OBJ (small=16x16) ---
     oamInitGfxSet(
@@ -174,7 +177,7 @@ int main(void) {
     // --- HUD ---
     hud_init("GUY");
     hud_draw_hp(gPlayer->hp, gPlayer->maxHp);
-    hud_draw_timer((u8)gTimer);
+    hud_draw_timer(gTimer);
     WaitForVBlank();
     hud_draw();
 
@@ -186,6 +189,8 @@ int main(void) {
     nmiSet(myconsoleVblank);
 
     setScreenOn();
+
+    gGameState = GS_PLAY;
 
     // --- Scroll setup ---
     bgMain.id           = 0;
@@ -213,41 +218,53 @@ int main(void) {
     while (1) {
         u16 pad = padsCurrent(0);
 
+        if (gGameState == GS_GAMEOVER) {
+            // Freeze game logic, only VBlank runs to keep display alive
+            WaitForVBlank();
+            continue;
+        }
+
         // 1) Player logic
         player_update(gPlayer, pad);
 
-        // 2) Update enemies
+        // 2) Check player death → game over
+        if (!gPlayer->alive) {
+            gGameState = GS_GAMEOVER;
+            continue;
+        }
+
+        // 3) Update enemies
         for (i = 1; i < MAX_CHARS; i++) {
             if (gCharacters[i].alive)
                 enemy_update(&gCharacters[i], gPlayer);
         }
 
-        // 3) Spawn waves based on player position
+        // 4) Spawn waves based on player position
         enemy_update_waves(gPlayer);
 
-        // 3b) Timer countdown
+        // 5) Timer countdown
         if (gTimer > 0) {
             gTimerTicks++;
             if (gTimerTicks >= 60) {
                 gTimerTicks = 0;
                 gTimer--;
-                hud_draw_timer((u8)gTimer);
+                hud_draw_timer(gTimer);
             }
         }
 
-        // 4) Physics: apply velocity + gravity to all
+        // 6) Physics: apply velocity + gravity to all
         for (i = 0; i < MAX_CHARS; i++) {
             if (gCharacters[i].alive)
                 char_update_pos(&gCharacters[i]);
         }
 
-        // 5) Animation: tick frames
+        // 7) Animation: tick frames
         for (i = 0; i < MAX_CHARS; i++) {
             if (gCharacters[i].alive)
                 char_update_gfx(&gCharacters[i]);
         }
 
-        // 6) Check if SPECIAL2 should spawn projectile
+        // 8) Check if SPECIAL2 should spawn projectile
         {
             static u8 sLastSub = 255;
             u8 curSub = gPlayer->subState;
@@ -263,32 +280,32 @@ int main(void) {
             if (gPlayer->state != STATE_SPECIAL2) sLastSub = 255;
         }
 
-        // 7) Collision: hitboxes + projectiles
+        // 9) Collision: hitboxes + projectiles
         collision_check_hitboxes();
 
-        // 8) Projectile movement
+        // 10) Projectile movement
         collision_update_projectiles();
 
-        // 9) Physical overlap resolution
+        // 11) Physical overlap resolution
         collision_resolve_overlap();
 
-        // 10) Z-depth sort (Y axis)
+        // 12) Z-depth sort (Y axis)
         char_sort_y_order();
 
-        // 11) Draw all characters
+        // 13) Draw all characters
         for (i = 0; i < MAX_CHARS; i++) {
             if (gCharacters[i].alive)
                 char_draw(&gCharacters[i]);
         }
 
-        // 12) HUD
+        // 14) HUD
         hud_draw_hp(gPlayer->hp, gPlayer->maxHp);
 
-        // 13) Scroll
+        // 15) Scroll
         handleScroll(&bgMain, gPlayer->x, gPlayer->velX);
         handleScroll(&bgSub,  gPlayer->x, gPlayer->velX);
 
-        // 14) VBlank (DMA OAM + tiles + BG + HUD)
+        // 16) VBlank (DMA OAM + tiles + BG + HUD)
         WaitForVBlank();
     }
 

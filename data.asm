@@ -202,7 +202,7 @@ BG2_map:
 BG2_map_end:
 
 ; ============================================================
-;  HUD
+;  HUD (tiles incluem bg + letras + digitos)
 ; ============================================================
 HUD_tiles:
     .incbin "assets/hud/hud.pic"

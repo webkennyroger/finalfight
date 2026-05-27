@@ -2,9 +2,6 @@
 *.sfc
 *.sym
 
-# Linker
-linkfile
-
 # Compiler/assembler intermediates (src/ only, root .asm are hand-written)
 src/*.ps
 src/*.asp

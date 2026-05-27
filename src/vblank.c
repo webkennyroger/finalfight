@@ -97,15 +97,4 @@ void scanPads(void) {
     }
 }
 
-// ----------------------------------------------------------------
-//  Stubs para scroll (scroll.c usa estas funções)
-// ----------------------------------------------------------------
-void vblank_queue_bg1(u8 *data, u16 vramDest, u16 size) {
-    // No contexto do main.c atual, o scroll chama updateBG1/BG2
-    // diretamente. Estas funções existem para compatibilidade com scroll.c.
-    dmaCopyVram(data, vramDest, size);
-}
 
-void vblank_queue_bg2(u8 *data, u16 vramDest, u16 size) {
-    dmaCopyVram(data, vramDest, size);
-}

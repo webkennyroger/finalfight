@@ -16,7 +16,7 @@ void hud_draw(void);
 void hud_draw_hp(u8 hp, u8 maxHp);
 void hud_draw_timer(u8 seconds);
 
-extern u16 gTimer;
+extern u8 gTimer;
 extern u8  gTimerTicks;
 
 #endif

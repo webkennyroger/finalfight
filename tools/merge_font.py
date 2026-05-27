@@ -14,5 +14,5 @@ if __name__ == '__main__':
     with open(hud_pic, 'wb') as f:
         f.write(hud)
 
-    n = len(font) // 32
+    n = len(font) // 16
     print(f"Merged {n} font tiles ({len(font)} bytes) into {hud_pic} ({len(hud)} bytes total)")
